@@ -1,11 +1,12 @@
+import { gitCommit, gitPush, gitTag } from "./git";
+
+import { NpmScript } from "./types/version-bump-progress";
+import { Operation } from "./operation";
+import { VersionBumpOptions } from "./types/version-bump-options";
+import { VersionBumpResults } from "./types/version-bump-results";
 import { getNewVersion } from "./get-new-version";
 import { getOldVersion } from "./get-old-version";
-import { gitCommit, gitPush, gitTag } from "./git";
-import { Operation } from "./operation";
 import { runNpmScript } from "./run-npm-script";
-import { VersionBumpOptions } from "./types/version-bump-options";
-import { NpmScript } from "./types/version-bump-progress";
-import { VersionBumpResults } from "./types/version-bump-results";
 import { updateFiles } from "./update-files";
 
 /**
@@ -48,6 +49,45 @@ export async function versionBump(arg: VersionBumpOptions | string = {}): Promis
   await getOldVersion(operation);
   await getNewVersion(operation);
 
+  // Run npm preversion script, if any
+  await runNpmScript(NpmScript.PreVersion, operation);
+
+  // Update the version number in all files
+  await updateFiles(operation);
+
+  // Run npm version script, if any
+  await runNpmScript(NpmScript.Version, operation);
+
+  // Git commit and tag, if enabled
+  await gitCommit(operation);
+  await gitTag(operation);
+
+  // Run npm postversion script, if any
+  await runNpmScript(NpmScript.PostVersion, operation);
+
+  // Push the git commit and tag, if enabled
+  await gitPush(operation);
+
+  return operation.results;
+}
+
+
+
+export async function selectVersion(arg: VersionBumpOptions | string = {}): Promise<Operation> {
+  if (typeof arg === "string") {
+    arg = { release: arg };
+  }
+
+  let operation = await Operation.start(arg);
+
+  // Get the old and new version numbers
+  await getOldVersion(operation);
+  await getNewVersion(operation);
+
+  return operation
+}
+
+export async function updateVersion(operation:Operation): Promise<VersionBumpResults> {
   // Run npm preversion script, if any
   await runNpmScript(NpmScript.PreVersion, operation);
 

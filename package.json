@@ -1,5 +1,5 @@
 {
-  "name": "@jsdevtools/version-bump-prompt",
+  "name": "version-bump-prompt2",
   "version": "6.0.3",
   "description": "Automatically (or with prompts) bump your version number, commit changes, tag, and push to Git",
   "keywords": [
@@ -15,8 +15,7 @@
     "prompt"
   ],
   "author": {
-    "name": "James Messinger",
-    "url": "https://jamesmessinger.com"
+    "name": "huruji"
   },
   "license": "MIT",
   "homepage": "https://jstools.dev/version-bump-prompt",
